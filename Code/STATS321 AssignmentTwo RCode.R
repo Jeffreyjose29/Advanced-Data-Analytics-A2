@@ -22,7 +22,16 @@ phbirths$smoke = as.factor(phbirths$smoke)
 #Summary for each variable in the dataset
 summary(phbirths)
 
-plot(phbirths$grams)
+#Summary of smoke dependent on if the mother was black or not
+xtabs(~ black + smoke, data = phbirths)
+
+#Box-plot of weight of babies when the mother is not black vs mother is black
+plot(phbirths$black, phbirths$grams, main = "Comparison Of Dist. Of Weights Of Babies From Non-Black & Black Mothers",
+     xlab = "Is The Mother Black?", ylab = "Weight (g)")
+
+#Using a linear model check the influence of smoke and being black on the weight of the baby
+fit.lm = lm(grams ~ black + smoke, data = phbirths)
+summary(fit.lm)
 ################################################### QUESTION 2 ###############################################################
 
 # 0 = non-occurance of vasoconstriction
