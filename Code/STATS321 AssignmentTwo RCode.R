@@ -22,6 +22,23 @@ phbirths$smoke = as.factor(phbirths$smoke)
 #Summary for each variable in the dataset
 summary(phbirths)
 
+install.packages("gclus")
+library(gclus)
+library(car)
+
+panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...) 
+{ 
+  usr <- par("usr"); on.exit(par(usr)) 
+  par(usr = c(0, 1, 0, 1)) 
+  r <- abs(cor(x, y)) 
+  txt <- format(c(r, 0.123456789), digits = digits)[1] 
+  txt <- paste0(prefix, txt) 
+  if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt) 
+  text(0.5, 0.5, txt, cex = cex.cor * r) 
+} 
+#Adds loess smoother in lower panel and the correlation in the upper panel
+pairs(~grams + black + educ + smoke + gestate, data = phbirths, main = "Data Relationship Plot", lower.panel = panel.smooth, upper.panel = panel.cor, pch = 20)
+
 #Summary of smoke dependent on if the mother was black or not
 xtabs(~ black + smoke, data = phbirths)
 
@@ -32,6 +49,8 @@ plot(phbirths$black, phbirths$grams, main = "Comparison Of Dist. Of Weights Of B
 #Using a linear model check the influence of smoke and being black on the weight of the baby
 fit.lm = lm(grams ~ black + smoke, data = phbirths)
 summary(fit.lm)
+
+
 ################################################### QUESTION 2 ###############################################################
 
 # 0 = non-occurance of vasoconstriction
@@ -108,12 +127,40 @@ pchisq(deviance(binary.logit.glm.NULL)-deviance(log.binary.logit.glm),
 
 
 #Part I
-new.data.df = data.frame(expand.grid(Volume = finney2$Volume, Rate = finney2$Rate), 0.1)
-new.data.df[1:5, ]
+# new.data.df = data.frame(expand.grid(Volume = finney2$Volume, Rate = finney2$Rate), 0.1)
+# new.data.df[1:5, ]
 
-#VOlume differs by 0.05
-for (volume in seq(from = 0, to = 50, by = 0.05)){
+install.packages('roperators')
+require(roperators)
 
+volumeArray <- vector()
+rateArray <- vector()
+i = 0
+for(rate in seq(from = 0, to = 4, by = 0.01)){
+  for(volume in seq(from = 0, to = 4, by = 0.05)){
+    new.blah <- data.frame(Volume = volume, Rate = rate)
+    predict.result <- 0
+    predict.result <- predict(binary.logit.glm, newdata = new.blah, type = "response")
+    print(typeof(predict.result))
+    #predict.result <- as.numeric(predict.result)
+    comp <- as.double(0.1)
+    if(predict.result == !!comp){
+      #print("test")
+      #print(volume)
+      #print(rate)
+      #append(volumeArray, volume, after = length(volumeArray))
+      #append(rateArray, rate, after = length(rateArray))
+      volumeArray[i] <- volume
+      rateArray[i] <- rate
+      i %+=% 1;
+    }else{
+      
+    }
+  }
 }
+
+print(volumeArray)
+print(rateArray)
+#VOlume differs by 0.05
 # finney2$Volume
 # finney2$Rate
