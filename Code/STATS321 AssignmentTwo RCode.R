@@ -130,17 +130,15 @@ pchisq(deviance(binary.logit.glm.NULL)-deviance(log.binary.logit.glm),
 install.packages('roperators')
 require(roperators)
 
-new.values <- data.frame(Volume = 0.4931439, Rate = 1.75000)
+new.values <- data.frame(Volume = -.8407604, Rate = 4)
 predict(binary.logit.glm, newdata = new.values, type = "response")
 
 for (vol in seq(from = 0.0, to = 4, by = 0.25)){
-  x <- 0
-  x <- solve(2.6491, 8.8754 / (3.8822*vol))
+  x <- solve(2.6491, 7.3324 - (3.8822*vol))
   print(c(vol, x))
 }
 
 for (rat in seq(from = 0.0, to = 4, by = 0.25)){
-  y <- 0
-  y <- solve(3.8822, 8.8754 / (2.6491*rat))
+  y <- solve(3.8822, 7.3324 - (2.6491*rat))
   print(c(rat, y))
 }
