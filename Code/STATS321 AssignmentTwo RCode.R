@@ -63,7 +63,7 @@ finney2 = read.table("finney2.txt", sep = " ", header = TRUE)
 #split the binary response into a seperate variable called binary and so it is easier to call
 binary  = factor(finney2$Response, c(0,1), labels = c("No Vasoconstriction","Vasoconstriction"))
 #plot the volume vs rate scatterplot defined by the response 
-plot(finney2$Volume, y = finney2$Rate, main = "Relation Between Rate of Inhalation vs. Volume of air inhaled", ylab = "Rate (L/s)", 
+plot(finney2$Volume, y = finney2$Rate, main = "Relation Between Rate of Inhalation vs. Volume of Air Inhaled", ylab = "Rate (L/s)", 
      xlab = "Volume (L)", col = c("red","blue")[binary], pch = c(19,4)[binary], cex = 1.5)
 legend(x = "topright", legend = levels(binary), col = c("red", "blue"), pch = c(19,4))
 
@@ -127,40 +127,20 @@ pchisq(deviance(binary.logit.glm.NULL)-deviance(log.binary.logit.glm),
 
 
 #Part I
-# new.data.df = data.frame(expand.grid(Volume = finney2$Volume, Rate = finney2$Rate), 0.1)
-# new.data.df[1:5, ]
-
 install.packages('roperators')
 require(roperators)
 
-volumeArray <- vector()
-rateArray <- vector()
-i = 0
-for(rate in seq(from = 0, to = 4, by = 0.01)){
-  for(volume in seq(from = 0, to = 4, by = 0.05)){
-    new.blah <- data.frame(Volume = volume, Rate = rate)
-    predict.result <- 0
-    predict.result <- predict(binary.logit.glm, newdata = new.blah, type = "response")
-    print(typeof(predict.result))
-    #predict.result <- as.numeric(predict.result)
-    comp <- as.double(0.1)
-    if(predict.result == !!comp){
-      #print("test")
-      #print(volume)
-      #print(rate)
-      #append(volumeArray, volume, after = length(volumeArray))
-      #append(rateArray, rate, after = length(rateArray))
-      volumeArray[i] <- volume
-      rateArray[i] <- rate
-      i %+=% 1;
-    }else{
-      
-    }
-  }
+new.values <- data.frame(Volume = 0.4931439, Rate = 1.75000)
+predict(binary.logit.glm, newdata = new.values, type = "response")
+
+for (vol in seq(from = 0.0, to = 4, by = 0.25)){
+  x <- 0
+  x <- solve(2.6491, 8.8754 / (3.8822*vol))
+  print(c(vol, x))
 }
 
-print(volumeArray)
-print(rateArray)
-#VOlume differs by 0.05
-# finney2$Volume
-# finney2$Rate
+for (rat in seq(from = 0.0, to = 4, by = 0.25)){
+  y <- 0
+  y <- solve(3.8822, 8.8754 / (2.6491*rat))
+  print(c(rat, y))
+}
