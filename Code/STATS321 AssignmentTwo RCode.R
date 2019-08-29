@@ -40,13 +40,17 @@ panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)
 } 
 #Adds loess smoother in lower panel and the correlation in the upper panel
 pairs(~grams + black + educ + smoke + gestate, data = phbirths, main = "Data Relationship Plot", lower.panel = panel.smooth, upper.panel = panel.cor, pch = 20)
-
+pairs(~grams + black + educ + smoke + gestate, data = phbirths)
 #Summary of smoke dependent on if the mother was black or not
 xtabs(~ black + smoke, data = phbirths)
-
+library(e1071)
 #Box-plot of weight of babies when the mother is not black vs mother is black
 plot(phbirths$black, phbirths$grams, main = "Comparison Of Dist. Of Weights Of Babies From Non-Black & Black Mothers",
      xlab = "Is The Mother Black?", ylab = "Weight (g)")
+ggplot(phbirths, aes(x = phbirths$grams, fill = phbirths$black)) + geom_density(alpha = 0.3) + ggtitle("Babies Weight Distribution Between Smokers And Non-Smokers") + xlab("Weight (g)") + ylab("Probability") + labs(fill = "Smokes?")
+
+plot(phbirths$smoke, phbirths$grams, main = "Comparison Of Dist. Of Weights Of Babies From Non-Smokers & Smoker",
+     xlab = "Does the mother smoke?", ylab = "Weight (g)")
 
 #Probability distribution of the weight of smoker's babies
 # install.packages("sm")
@@ -60,7 +64,6 @@ ggplot(phbirths, aes(x = phbirths$grams, fill = phbirths$smoke)) + geom_density(
 fit.lm = lm(grams ~ black + smoke, data = phbirths)
 summary(fit.lm)
 
-phbirths$smoke
 ################################################### QUESTION 2 ###############################################################
 
 # 0 = non-occurance of vasoconstriction
