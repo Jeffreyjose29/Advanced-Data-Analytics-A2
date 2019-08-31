@@ -21,6 +21,9 @@ help("phbirths")
 phbirths$black = as.factor(phbirths$black)
 phbirths$smoke = as.factor(phbirths$smoke)
 
+#Summary of smoke dependent on if the mother was black or not
+xtabs(~ black + smoke, data = phbirths)
+
 #Summary for each variable in the dataset
 summary(phbirths)
 
@@ -28,6 +31,7 @@ install.packages("gclus")
 library(gclus)
 library(car)
 
+#Adds loess smoother in lower panel and the correlation in the upper panel
 panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...) 
 { 
   usr <- par("usr"); on.exit(par(usr)) 
@@ -38,32 +42,74 @@ panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)
   if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt) 
   text(0.5, 0.5, txt, cex = cex.cor * r) 
 } 
-#Adds loess smoother in lower panel and the correlation in the upper panel
 pairs(~grams + black + educ + smoke + gestate, data = phbirths, main = "Data Relationship Plot", lower.panel = panel.smooth, upper.panel = panel.cor, pch = 20)
-pairs(~grams + black + educ + smoke + gestate, data = phbirths)
-#Summary of smoke dependent on if the mother was black or not
-xtabs(~ black + smoke, data = phbirths)
-library(e1071)
-#Box-plot of weight of babies when the mother is not black vs mother is black
+
+#Box-plot of weight of babies when the mother is not black vs mother is black and probability density plot of this
 plot(phbirths$black, phbirths$grams, main = "Comparison Of Dist. Of Weights Of Babies From Non-Black & Black Mothers",
      xlab = "Is The Mother Black?", ylab = "Weight (g)")
-ggplot(phbirths, aes(x = phbirths$grams, fill = phbirths$black)) + geom_density(alpha = 0.3) + ggtitle("Babies Weight Distribution Between Smokers And Non-Smokers") + xlab("Weight (g)") + ylab("Probability") + labs(fill = "Smokes?")
+ggplot(phbirths, aes(x = phbirths$grams, fill = phbirths$black)) + geom_density(alpha = 0.3) + ggtitle("Babies Weight Distribution Between Black And Non-Black") + xlab("Weight (g)") + ylab("Probability") + labs(fill = "Black?")
 
+#Box-plot of weight of babies when the mother is a smoker vs non-smoker and probability density plot of this
 plot(phbirths$smoke, phbirths$grams, main = "Comparison Of Dist. Of Weights Of Babies From Non-Smokers & Smoker",
      xlab = "Does the mother smoke?", ylab = "Weight (g)")
-
-#Probability distribution of the weight of smoker's babies
-# install.packages("sm")
-# library(sm)
-# sm.density.compare(phbirths$grams, phbirths$smoke)
-# legend("topright", levels(phbirths$smoke), fill = 2+(0:nlevels(phbirths$smoke)))
-
 ggplot(phbirths, aes(x = phbirths$grams, fill = phbirths$smoke)) + geom_density(alpha = 0.3) + ggtitle("Babies Weight Distribution Between Smokers And Non-Smokers") + xlab("Weight (g)") + ylab("Probability") + labs(fill = "Smokes?")
 
-#Using a linear model check the influence of smoke and being black on the weight of the baby
-fit.lm = lm(grams ~ black + smoke, data = phbirths)
-summary(fit.lm)
+########### MODEL MANIPULATION #############
+fullModel.glm = glm(grams ~ ., data = phbirths)
+summary(fullModel.glm)
+#Diagnostic plot for the full model
+par(mfrow = c(2,2))
+plot(fullModel.glm)
 
+BSModel.glm = glm(grams ~ black + smoke + black:smoke, data = phbirths)
+summary(BSModel.glm)
+plot(BSModel.glm)
+
+BSGModel.glm = glm(grams ~ black + smoke + gestate + black:smoke, data = phbirths)
+summary(BSGModel.glm)
+chisq.test(phbirths$smoke, phbirths$grams)
+chisq.test(phbirths$gestate, phbirths$grams)
+chisq.test(phbirths$black, phbirths$grams)
+chisq.test(phbirths$black:phbirths$smoke, phbirths$grams)
+
+#### STEP-WISE REGRESSION ###########
+big.lm = lm(grams ~ (black + smoke)^2 + (black + smoke)*(educ + gestate) ,data = phbirths)
+summary(big.lm)
+plot(big.lm)
+
+small.lm = step(big.lm, trace = FALSE)
+anova(small.lm)
+summary(small.lm)
+
+small.faraway.lm = lm(grams ~ black * (smoke) + log(gestate),data = phbirths)
+anova(small.faraway.lm)
+summary(small.faraway.lm)
+plot(small.faraway.lm)
+
+anova(small.lm, big.lm)
+
+logGestate.lm = lm(grams ~ log(gestate) + black:smoke, data = phbirths)
+summary(logGestate.lm)
+anova(small.lm, logGestate.lm)
+anova(logGestate.lm, small.lm)
+
+test = lm(grams ~ black * (smoke + educ) + log1p(gestate),data = phbirths)
+anova(test)
+summary(test)
+
+fit1.lm = lm(grams ~ black * (smoke) + black + smoke + educ + log(gestate), data = phbirths)
+summary(fit1.lm)
+
+#######
+plot(small.lm)
+phbirths[119,]
+phbirths[1045,]
+phbirths[152,]
+
+updatePhBirths <- phbirths[-c(119, 1045, 94, 748, 752, 987),]
+Ubig.lm = lm(grams ~ (black + smoke)^2 + (black + smoke)*(educ + gestate) ,data = updatePhBirths)
+Usmall.lm = step(Ubig.lm, trace = FALSE)
+plot(Usmall.lm)
 ################################################### QUESTION 2 ###############################################################
 
 # 0 = non-occurance of vasoconstriction
