@@ -191,6 +191,8 @@ require(roperators)
 
 volArray <- c()
 ratArray <- c()
+logVolArray <- c()
+logRatArray <- c()
 #For the initial logit link model
 for (vol in seq(from = 0.0, to = 4, by = 0.25)){
   x <- solve(2.6491, 7.3324 - (3.8822*vol))
@@ -213,12 +215,18 @@ for (rat in seq(from = 0.0, to = 4, by = 0.25)){
 #For the log logit link model
 for (LogVol in seq(from = 0.0, to = 4, by = 0.25)){
   x <- solve(4.562, 0.6778 - (5.179*LogVol))
+  x <- exp(x)
   print(c(LogVol, x))
+  logVolArray <- append(logVolArray, LogVol, after = length(logVolArray))
+  logRatArray <- append(logRatArray, x, after = length(logRatArray))
 }
 
 for (LogRat in seq(from = 0.0, to = 4, by = 0.25)){
   y <- solve(5.179, 0.6778 - (4.562*LogRat))
+  y <- exp(y)
   print(c(LogRat, y))
+  logVolArray <- append(logVolArray, y, after = length(logVolArray))
+  logRatArray <- append(logRatArray, LogRat, after = length(logRatArray))
 }
 
 #Plotting prediction points on the graph
@@ -231,6 +239,9 @@ plot(finney2$Volume, y = finney2$Rate, main = "Relation Between Rate of Inhalati
 legend(x = "topright", legend = levels(binary), col = c("red", "blue"), pch = c(19,4))
 for(i in seq_along(volArray)){
   points.default(volArray[i], ratArray[i], type = "p", pch = 21, col = "black", bg = NA, cex = 1.25)
+}
+for(i in seq_along(logVolArray)){
+  points.default(logVolArray[i], logRatArray[i], type = "p", pch = 0, col = "#E7B800", bg = NA, cex = 1.25)
 }
 
 #Plotting points used earlier for prediction
